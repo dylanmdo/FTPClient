@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox fx:id="ItemDoc" alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="305.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.ftpclient.Controller.DocumentItemController">
+   <children>
+      <ImageView fx:id="DocIcon" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../assets/directory.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="DocName" prefHeight="22.0" prefWidth="299.0" style="-fx-font-size: 16;" text="Library" wrapText="true">
+         <HBox.margin>
+            <Insets left="5.0" />
+         </HBox.margin>
+      </Label>
+   </children>
+</HBox>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox fx:id="containerDocChildItem" alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="610.0" spacing="5.0" style="-fx-background-color: white;" stylesheets="@../assets/cupertino-light.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.ftpclient.Controller.DocChildItemController">
+   <children>
+      <ImageView fx:id="DocChildItemIcon" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../assets/directory.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="DocChildItemName" prefHeight="22.0" prefWidth="243.0" style="-fx-font-size: 16;" text="Library" wrapText="true">
+         <padding>
+            <Insets left="5.0" />
+         </padding>
+      </Label>
+      <Label fx:id="DocChildItemSize" alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="111.0" style="-fx-font-size: 16;" />
+      <Label fx:id="DocChildItemDate" alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="194.0" style="-fx-font-size: 16;" text="1 Juin 2022" />
+   </children>
+   <padding>
+      <Insets left="5.0" />
+   </padding>
+</HBox>

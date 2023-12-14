@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.ftpclient.Controller.LoginController">
+   <children>
+      <ImageView fitHeight="500.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../assets/img_login.png" />
+         </image>
+      </ImageView>
+      <VBox focusTraversable="true" layoutX="390.0" layoutY="111.0" prefHeight="258.0" prefWidth="280.0" spacing="20.0">
+         <children>
+            <TextField fx:id="TextFieldLoginServer" prefHeight="25.0" prefWidth="253.0" promptText="Serveur" />
+            <TextField fx:id="TextFieldLoginId" prefHeight="25.0" prefWidth="253.0" promptText="Identifiant" />
+            <PasswordField fx:id="TextFieldLoginPassword" prefHeight="25.0" prefWidth="253.0" promptText="Mot de passe" styleClass="text-input" />
+            <TextField fx:id="TextFieldLoginPort" prefHeight="25.0" prefWidth="253.0" promptText="Port : 21" />
+            <VBox prefHeight="305.0" prefWidth="280.0" spacing="20.0">
+               <children>
+                  <Label fx:id="errorLoginMessage" alignment="CENTER" prefHeight="18.0" prefWidth="353.0" styleClass="danger" stylesheets="@../assets/cupertino-light.css" textAlignment="CENTER" />
+                  <Button mnemonicParsing="false" onAction="#submitConnection" prefHeight="30.0" prefWidth="314.0" text="Connexion">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+      </VBox>
+      <Text layoutX="428.0" layoutY="88.0" strokeType="OUTSIDE" strokeWidth="0.0" text="File transfer" textAlignment="CENTER">
+         <font>
+            <Font name="Avenir Book" size="39.0" />
+         </font>
+      </Text>
+   </children>
+</AnchorPane>
