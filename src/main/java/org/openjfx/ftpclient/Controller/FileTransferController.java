@@ -665,21 +665,32 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
             }
         }
 
-        if (!filesToUpload.isEmpty()) {
-            progressBarFtp.setProgress(0.0);
-            for (File file : filesToUpload) {
-                if (file.isFile()) {
-                    //ftpUploadFile.uploadFileAsync(filesToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
-                    ftpUploadFile.uploadFileAsync(filesToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
-                } else if (file.isDirectory()) {
-                    //ftpUploadFile.uploadDirectoryAsync(filesToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
-                    ftpUploadFile.uploadDirectoryAsync(filesToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+        List<File> filesDagDropToUpload = new ArrayList<>();
+        List<File> DirDagDropToUpload = new ArrayList<>();
+
+        for (File file : filesToUpload) {
+            if (file.isFile()) {
+                filesDagDropToUpload.add(file);
+            } else if (file.isDirectory()) {
+                DirDagDropToUpload.add(file);
+            }
+        }
 
 
-                }
+
+        try {
+            if (!filesDagDropToUpload.isEmpty()) {
+                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
             }
 
+            if (!DirDagDropToUpload.isEmpty()) {
+                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+            }
+        } catch (Exception e) {
+            ////AJOUTER MESSAGE ERREUR
+            System.out.println(e.getMessage());
         }
+
 
 
     }
