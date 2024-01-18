@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.*;
 import javafx.util.Duration;
 import org.apache.commons.net.PrintCommandListener;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPFile;
 import org.openjfx.ftpclient.Model.*;
 
@@ -80,6 +81,8 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         files = connectionFtpClient.getFtpClient().listFiles();
         ftpServer.setText(connectionFtpClient.getServer());
         this.dataLogins = dataLogins;
+
+
 
 
 
@@ -265,10 +268,12 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
     @FXML
     private void ftpRefresh() throws Exception {
 
+        connectionFtpClient.getFtpClient().logout();
         connectionFtpClient.getFtpClient().disconnect();
-        connectionFtpClient.getFtpClient().connect(connectionFtpClient.getServer(), port);
-        connectionFtpClient.getFtpClient().login(id, password);
+        connectionFtpClient.getFtpClient().connect("node161-eu.n0c.com", 21);
+        connectionFtpClient.getFtpClient().login("admin@devbraserogascon.go.yj.fr", "R@dica32000");
         connectionFtpClient.getFtpClient().enterLocalPassiveMode();
+        connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);;
         //listDocuments();
     }
 
