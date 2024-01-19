@@ -12,14 +12,13 @@ import org.openjfx.ftpclient.Controller.LoginController;
 import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
 
-    /**
-    * Cette classe gère le téléchargement de fichiers et de répertoires depuis un serveur FTP de manière asynchrone.
-    * Elle utilise un pool de threads pour gérer efficacement les tâches de téléchargement.
-    */
+/**
+ * Cette classe gère le téléchargement de fichiers et de répertoires depuis un serveur FTP de manière asynchrone.
+ * Elle utilise un pool de threads pour gérer efficacement les tâches de téléchargement.
+ */
 public class FtpDownloader {
     /**
      * Initialise un nouveau FtpDownloader avec un pool d'exécution d'un seul thread.
@@ -55,25 +54,26 @@ public class FtpDownloader {
      * @param container    Le conteneur parent pour afficher la notification visuelle
      * @param dataLogins   Les informations d'identification pour la connexion FTP
      */
-    public void downloadDirectoryAsync(String remoteDir, String localDirPath, ProgressBar progressBar, Parent container, String[] dataLogins) {
+    public void downloadDirectoryAsync(String remoteDir, String localDirPath, ProgressBar progressBar, Parent container, String[] dataLogins) throws Exception {
         executorService.execute(() -> {
             try {
+                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 // Appel de la méthode downloadDirectory
-                if (downloadDirectory(getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]), remoteDir, localDirPath, progressBar)) {
+                if (downloadDirectory(connectionFtpClient, remoteDir, localDirPath, progressBar)) {
                     toastNotification(container).play();
-                    getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]).getFtpClient().disconnect();
                 }
+                connectionFtpClient.getFtpClient().disconnect();
 
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
+
             }
 
 
         });
 
     }
-
 
     /**
      * Télécharge de manière asynchrone un fichier depuis le serveur FTP.
@@ -84,15 +84,15 @@ public class FtpDownloader {
      * @param container   Le conteneur parent pour afficher la notification visuelle
      * @param dataLogins  Les informations d'identification pour la connexion FTP
      */
-    public void downloadFileAsync(String remoteFile, String localFile, ProgressBar progressBar, Parent container, String[] dataLogins) {
+    public void downloadFileAsync(String remoteFile, String localFile, ProgressBar progressBar, Parent container, String[] dataLogins) throws Exception {
 
         executorService.execute(() -> {
             try {
                 // Appel de la méthode downloadFile
-
-                if (downloadFile(getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]), remoteFile, localFile, progressBar)) {
+                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                if (downloadFile(connectionFtpClient, remoteFile, localFile, progressBar)) {
                     toastNotification(container).play();
-                    getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]).getFtpClient().disconnect();
+                    connectionFtpClient.getFtpClient().disconnect();
 
                 }
 
@@ -219,14 +219,18 @@ public class FtpDownloader {
     private boolean downloadFile(ConnectionFtpClient connectionFtpClient, String remoteFilePath, String localFilePath) {
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(localFilePath))) {
             if (connectionFtpClient.getFtpClient().retrieveFile(remoteFilePath, outputStream)) {
+
                 return true;
             } else {
                 return false;
             }
 
+
         } catch (IOException e) {
             throw new RuntimeException(e);
+
         }
+
 
     }
 

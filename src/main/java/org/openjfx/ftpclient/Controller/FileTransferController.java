@@ -86,10 +86,10 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
 
 
-        /*this.server = dataLogins[0];
+        this.server = dataLogins[0];
         this.port = Integer.parseInt(dataLogins[1]);
         this.id = dataLogins[2];
-        this.password = dataLogins[3];*/
+        this.password = dataLogins[3];
 
         setFtpLink();
 
@@ -270,10 +270,10 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
         connectionFtpClient.getFtpClient().logout();
         connectionFtpClient.getFtpClient().disconnect();
-        connectionFtpClient.getFtpClient().connect("node161-eu.n0c.com", 21);
-        connectionFtpClient.getFtpClient().login("admin@devbraserogascon.go.yj.fr", "R@dica32000");
+        connectionFtpClient.getFtpClient().connect(server, port);
+        connectionFtpClient.getFtpClient().login(id, password);
         connectionFtpClient.getFtpClient().enterLocalPassiveMode();
-        connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);;
+        connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);
         //listDocuments();
     }
 
@@ -373,14 +373,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
                     if (!downloadFile.equals(fileName)) {
 
                         progressBarFtp.setProgress(0.0);
-                        //ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp,popupDownload,dataLogins);
+                        ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp,popupDownload,dataLogins);
 
                         //-----BYPASS---//
-                        ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload);
+                        //ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload);
 
 
                     } else {
                         showDialogueBox("/Vue/MessageBoxFileExist.fxml");
+                        //ftpDownloader.deleteCloseConnection(dataLogins);
                     }
 
 
@@ -412,14 +413,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
                         progressBarFtp.setProgress(0.0);
 
-                        //ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp,popupDownload,dataLogins);
+                        ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp,popupDownload,dataLogins);
 
                         //BYPASS//
-                        ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload).shutdown();
+                        //ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload).shutdown();
 
 
                     } else {
                         showDialogueBox("/Vue/MessageBoxFileExist.fxml");
+
                     }
 
 
@@ -500,15 +502,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         if (messageBoxController.isConfirmClicked()) {
 
             if (files[iterator].isFile()) {
-                //ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this,dataLogins);
+                ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this,dataLogins);
                 //----BYPASS-------//
-                ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this);
+                //ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this);
 
 
             } else if (files[iterator].isDirectory() || files[iterator].isSymbolicLink()) {
-                //ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this,dataLogins);
+                ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this,dataLogins);
                 //----BYPASS-------//
-                ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this);
+                //ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this);
 
             }
 
@@ -685,11 +687,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
         try {
             if (!filesDagDropToUpload.isEmpty()) {
-                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+                //ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
             }
 
             if (!DirDagDropToUpload.isEmpty()) {
-                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+                //ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
+                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
             }
         } catch (Exception e) {
             ////AJOUTER MESSAGE ERREUR

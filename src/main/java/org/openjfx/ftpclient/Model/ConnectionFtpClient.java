@@ -44,7 +44,6 @@ public class ConnectionFtpClient {
         int reply = ftpClient.getReplyCode();
         if (!FTPReply.isPositiveCompletion(reply)) {
             ftpClient.disconnect();
-            System.out.println("Connexion au serveur impossible");
         } else {
             ftpClient.login(user, password);
             ftpClient.enterLocalPassiveMode();

@@ -87,8 +87,8 @@ public class LoginController {
             errorLoginMessage.setText("Remplissez les champs vides !");
 
             //Bypass connexion
-            loginToServer();
-            sceneController.fileTransferVue(event, connectionFtpClient, dataLogins);
+            //loginToServer();
+            //sceneController.fileTransferVue(event, connectionFtpClient, dataLogins);
 
         }
 
@@ -108,10 +108,10 @@ public class LoginController {
         password = TextFieldLoginPassword.getText();
 
         //Bypass Login
-        connectionFtpClient = new ConnectionFtpClient("node161-eu.n0c.com", 21, "admin@devbraserogascon.go.yj.fr", "R@dica32000");
-        //connectionFtpClient = new ConnectionFtpClient("demo.wftpserver.com", 21, "demo", "demo");
+        //connectionFtpClient = new ConnectionFtpClient("node161-eu.n0c.com", 21, "admin@devbraserogascon.go.yj.fr", "R@dica32000");
+        connectionFtpClient = new ConnectionFtpClient("demo.wftpserver.com", 21, "demo", "demo");
 
-        //connectionFtpClient = new ConnectionFtpClient(server, port, id, password);
+        connectionFtpClient = new ConnectionFtpClient(server, port, id, password);
         connectionFtpClient.connectionLoginServer();
 
         return connectionFtpClient;

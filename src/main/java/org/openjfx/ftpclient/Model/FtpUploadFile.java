@@ -76,15 +76,15 @@ public class FtpUploadFile {
 
             try {
 
-                //ByPass//
-                if (uploadFile(getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]), filesDragDrop, currentRemoteFilePath, progressBar)) {
+                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                if (uploadFile(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
 
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
 
-                    getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]).getFtpClient().disconnect();
+                    connectionFtpClient.getFtpClient().disconnect();
 
                 }
 
@@ -113,12 +113,13 @@ public class FtpUploadFile {
         executorService.execute(() -> {
 
             try {
-                if (uploadDirectory(getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]), filesDragDrop, currentRemoteFilePath, progressBar)) {
+                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                if (uploadDirectory(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
-                    getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]).getFtpClient().disconnect();
+                    connectionFtpClient.getFtpClient().disconnect();
 
                 }
 
