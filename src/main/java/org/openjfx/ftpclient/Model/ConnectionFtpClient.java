@@ -5,6 +5,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 
 public class ConnectionFtpClient {
@@ -13,6 +14,8 @@ public class ConnectionFtpClient {
      private final String user;
     private final String password;
     private FTPClient ftpClient;
+
+    public static ArrayList<ConnectionFtpClient> allConnectionFtp = new ArrayList<>();
 
 
     public String getServer() {
@@ -32,6 +35,8 @@ public class ConnectionFtpClient {
         this.user = user;
         this.password = password;
     }
+
+
 
 
     public void connectionLoginServer() throws Exception {
