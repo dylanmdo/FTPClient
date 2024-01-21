@@ -33,9 +33,6 @@ public class LoginController {
 
     private ConnectionFtpClient connectionFtpClient;
 
-    String[] dataLogins;
-
-
     @FXML
     private void submitConnection(ActionEvent event) throws Exception {
 
@@ -109,7 +106,7 @@ public class LoginController {
 
         //Bypass Login
         //connectionFtpClient = new ConnectionFtpClient("node161-eu.n0c.com", 21, "admin@devbraserogascon.go.yj.fr", "R@dica32000");
-        connectionFtpClient = new ConnectionFtpClient("demo.wftpserver.com", 21, "demo", "demo");
+        //connectionFtpClient = new ConnectionFtpClient("demo.wftpserver.com", 21, "demo", "demo");
 
         connectionFtpClient = new ConnectionFtpClient(server, port, id, password);
         connectionFtpClient.connectionLoginServer();

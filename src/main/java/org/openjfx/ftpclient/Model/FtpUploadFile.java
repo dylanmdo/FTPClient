@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
+import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 /**
  * Gère le téléchargement de fichiers et de répertoires vers un serveur FTP de manière asynchrone.
@@ -77,6 +78,7 @@ public class FtpUploadFile {
             try {
 
                 ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                allConnectionFtp.add(connectionFtpClient);
                 if (uploadFile(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
 
                     if (uploadCallback != null) {
@@ -84,6 +86,7 @@ public class FtpUploadFile {
                     }
                     toastNotification(container).play();
 
+                    allConnectionFtp.remove(connectionFtpClient);
                     connectionFtpClient.getFtpClient().disconnect();
 
                 }
@@ -114,11 +117,13 @@ public class FtpUploadFile {
 
             try {
                 ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                allConnectionFtp.add(connectionFtpClient);
                 if (uploadDirectory(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
+                    allConnectionFtp.remove(connectionFtpClient);
                     connectionFtpClient.getFtpClient().disconnect();
 
                 }

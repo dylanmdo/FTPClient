@@ -29,7 +29,7 @@ public class Main extends Application {
         Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
 
         //Chargement de la page de connexion
-        loginPage();
+        loginPage(primaryStage);
 
 
     }
@@ -37,7 +37,7 @@ public class Main extends Application {
 
 
 
-    public void loginPage() throws IOException {
+    public void loginPage(Stage primaryStage) throws IOException {
         // Configurer la scène avec la vue chargée et afficher la fenêtre principale
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));
         Parent root = loader.load();
@@ -47,6 +47,8 @@ public class Main extends Application {
         primaryStage.show();
 
     }
+
+
 
 
 }

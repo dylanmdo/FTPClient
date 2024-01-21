@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
+import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 /**
  * Cette classe gère les opérations de suppression de fichiers et répertoires sur un serveur FTP de manière asynchrone.
@@ -55,13 +56,15 @@ public class FtpDeleteFile {
         this.uploadCallback = callback;
         executorService.execute(() -> {
             try {
-                //BYPASS//
+
                 ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                allConnectionFtp.add(connectionFtpClient);
                 if (deleteFile(connectionFtpClient, fileToDelete)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
+                    allConnectionFtp.remove(connectionFtpClient);
                     connectionFtpClient.getFtpClient().disconnect();
                 }
             } catch (Exception e) {
@@ -84,11 +87,13 @@ public class FtpDeleteFile {
         executorService.execute(() -> {
             try {
                 ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                allConnectionFtp.add(connectionFtpClient);
                 if (deleteDirectory(connectionFtpClient, directoryToDelete)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
+                    allConnectionFtp.remove(connectionFtpClient);
                     connectionFtpClient.getFtpClient().disconnect();
                 }
             } catch (Exception e) {

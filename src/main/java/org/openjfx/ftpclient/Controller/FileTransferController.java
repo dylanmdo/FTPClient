@@ -3,6 +3,7 @@ package org.openjfx.ftpclient.Controller;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,18 +16,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
 import javafx.util.Duration;
-import org.apache.commons.net.PrintCommandListener;
+import org.apache.commons.net.ProtocolCommandEvent;
+import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPFile;
+import org.openjfx.ftpclient.Main;
 import org.openjfx.ftpclient.Model.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 public class FileTransferController implements FtpUploadFile.UploadCallback {
 
@@ -40,6 +45,9 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
     @FXML
     private VBox containerDocChild;
+
+    @FXML
+    private MenuItem userId;
 
     public ConnectionFtpClient connectionFtpClient;
 
@@ -72,8 +80,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
     String[] dataLogins;
 
+    Main main = new Main();
+
+
+
     public FileTransferController() throws Exception {
     }
+
 
     @FXML
     public void initialize(ConnectionFtpClient connectionFtpClient, String[] dataLogins) throws Exception {
@@ -82,14 +95,12 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         ftpServer.setText(connectionFtpClient.getServer());
         this.dataLogins = dataLogins;
 
-
-
-
-
         this.server = dataLogins[0];
         this.port = Integer.parseInt(dataLogins[1]);
         this.id = dataLogins[2];
         this.password = dataLogins[3];
+
+        userId.setText(id);
 
         setFtpLink();
 
@@ -97,6 +108,11 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
 
     }
+
+
+
+
+
 
 
     private void setFtpLink() throws IOException {
@@ -153,6 +169,8 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
             }
         }
     }
+
+
 
 
     // Méthode pour ajouter Les dossiers Parent à l'interface utilisateur (Partie : Parent Document)
@@ -268,13 +286,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
     @FXML
     private void ftpRefresh() throws Exception {
 
-        connectionFtpClient.getFtpClient().logout();
-        connectionFtpClient.getFtpClient().disconnect();
+        if (connectionFtpClient.getFtpClient().isConnected()){
+            connectionFtpClient.getFtpClient().logout();
+            connectionFtpClient.getFtpClient().disconnect();
+        }
         connectionFtpClient.getFtpClient().connect(server, port);
         connectionFtpClient.getFtpClient().login(id, password);
         connectionFtpClient.getFtpClient().enterLocalPassiveMode();
         connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);
-        //listDocuments();
+
     }
 
     public String formatBytes(long bytes) {
@@ -373,7 +393,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
                     if (!downloadFile.equals(fileName)) {
 
                         progressBarFtp.setProgress(0.0);
-                        ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp,popupDownload,dataLogins);
+                        ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload, dataLogins);
 
                         //-----BYPASS---//
                         //ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload);
@@ -413,7 +433,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
                         progressBarFtp.setProgress(0.0);
 
-                        ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp,popupDownload,dataLogins);
+                        ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload, dataLogins);
 
                         //BYPASS//
                         //ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload).shutdown();
@@ -502,13 +522,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         if (messageBoxController.isConfirmClicked()) {
 
             if (files[iterator].isFile()) {
-                ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this,dataLogins);
+                ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete, this, dataLogins);
                 //----BYPASS-------//
                 //ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this);
 
 
             } else if (files[iterator].isDirectory() || files[iterator].isSymbolicLink()) {
-                ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this,dataLogins);
+                ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete, this, dataLogins);
                 //----BYPASS-------//
                 //ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this);
 
@@ -684,16 +704,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         }
 
 
-
         try {
             if (!filesDagDropToUpload.isEmpty()) {
                 //ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
-                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
+                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
             }
 
             if (!DirDagDropToUpload.isEmpty()) {
                 //ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
-                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this,dataLogins);
+                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
             }
         } catch (Exception e) {
             ////AJOUTER MESSAGE ERREUR
@@ -701,15 +720,40 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         }
 
 
-
     }
 
     @FXML
-    void ftpCancel(MouseEvent event) {
+    void ftpClose(ActionEvent event) throws IOException {
+        closeAllConnectionTtp();
 
-
+        System.exit(0);
     }
 
+
+    @FXML
+    void ftpLogout(ActionEvent event) throws IOException {
+        Stage primaryStage = new Stage();
+        Stage currentStage = (Stage) containerDocument.getScene().getWindow();
+
+        closeAllConnectionTtp();
+
+        currentStage.close();
+        main.loginPage(primaryStage);
+    }
+
+    public void closeAllConnectionTtp() throws IOException {
+        //Fermeture de la connexion du thread principal
+        connectionFtpClient.getFtpClient().logout();
+        connectionFtpClient.getFtpClient().disconnect();
+
+        //Fermeture de la connexion du thread asynchrone
+        if (!allConnectionFtp.isEmpty()){
+            for (ConnectionFtpClient ftpClient : allConnectionFtp) {
+                ftpClient.getFtpClient().logout();
+                ftpClient.getFtpClient().disconnect();
+            }
+        }
+    }
 
 
 
