@@ -83,7 +83,6 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
     Main main = new Main();
 
 
-
     public FileTransferController() throws Exception {
     }
 
@@ -108,11 +107,6 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
 
     }
-
-
-
-
-
 
 
     private void setFtpLink() throws IOException {
@@ -169,8 +163,6 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
             }
         }
     }
-
-
 
 
     // Méthode pour ajouter Les dossiers Parent à l'interface utilisateur (Partie : Parent Document)
@@ -286,14 +278,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
     @FXML
     private void ftpRefresh() throws Exception {
 
-        if (connectionFtpClient.getFtpClient().isConnected()){
-            connectionFtpClient.getFtpClient().logout();
-            connectionFtpClient.getFtpClient().disconnect();
-        }
+        connectionFtpClient.getFtpClient().logout();
+        connectionFtpClient.getFtpClient().disconnect();
         connectionFtpClient.getFtpClient().connect(server, port);
         connectionFtpClient.getFtpClient().login(id, password);
         connectionFtpClient.getFtpClient().enterLocalPassiveMode();
         connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);
+        updateFileListAndUI();
 
     }
 
@@ -523,6 +514,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
             if (files[iterator].isFile()) {
                 ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete, this, dataLogins);
+
                 //----BYPASS-------//
                 //ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this);
 
@@ -724,8 +716,6 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
     @FXML
     void ftpClose(ActionEvent event) throws IOException {
-        closeAllConnectionTtp();
-
         System.exit(0);
     }
 
@@ -747,15 +737,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         connectionFtpClient.getFtpClient().disconnect();
 
         //Fermeture de la connexion du thread asynchrone
-        if (!allConnectionFtp.isEmpty()){
+        if (!allConnectionFtp.isEmpty()) {
             for (ConnectionFtpClient ftpClient : allConnectionFtp) {
                 ftpClient.getFtpClient().logout();
                 ftpClient.getFtpClient().disconnect();
             }
         }
     }
-
-
 
 
     @Override

@@ -2,12 +2,16 @@ package org.openjfx.ftpclient.Controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import org.apache.commons.net.ftp.FTPReply;
 import org.openjfx.ftpclient.Model.ConnectionFtpClient;
+
+import java.io.IOException;
 
 public class LoginController {
 
@@ -32,10 +36,11 @@ public class LoginController {
     String password;
 
     private ConnectionFtpClient connectionFtpClient;
+    public static LoginController getLoginController;
 
     @FXML
     private void submitConnection(ActionEvent event) throws Exception {
-
+        getLoginController();
 
         SceneController sceneController = new SceneController();
 
@@ -123,4 +128,16 @@ public class LoginController {
 
         return connectionFtpClient;
     }
+
+
+
+    private void getLoginController() throws IOException {// Initialisez cette instance correctement
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));
+        Parent root = loader.load();
+
+        getLoginController = loader.getController();
+
+    }
+
+
 }

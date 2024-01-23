@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
+import static org.openjfx.ftpclient.Controller.LoginController.getLoginController;
 import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 /**
@@ -32,18 +33,7 @@ public class FtpDownloader {
         this.executorService = Executors.newFixedThreadPool(1); // Vous pouvez ajuster le nombre de threads selon vos besoins
     }
 
-    /**
-     * Récupère le contrôleur de connexion FTP.
-     *
-     * @return Le contrôleur de connexion FTP initialisé correctement
-     * @throws IOException En cas d'erreur lors de l'initialisation
-     */
-    private LoginController getLoginController() throws IOException {// Initialisez cette instance correctement
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));
-        Parent root = loader.load();
 
-        return loader.getController();
-    }
 
 
     /**
@@ -58,7 +48,7 @@ public class FtpDownloader {
     public void downloadDirectoryAsync(String remoteDir, String localDirPath, ProgressBar progressBar, Parent container, String[] dataLogins) throws Exception {
         executorService.execute(() -> {
             try {
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 // Appel de la méthode downloadDirectory
                 if (downloadDirectory(connectionFtpClient, remoteDir, localDirPath, progressBar)) {
@@ -92,7 +82,7 @@ public class FtpDownloader {
         executorService.execute(() -> {
             try {
                 // Appel de la méthode downloadFile
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 if (downloadFile(connectionFtpClient, remoteFile, localFile, progressBar)) {
                     toastNotification(container).play();
@@ -139,33 +129,31 @@ public class FtpDownloader {
 
 
         File downloadDir = new File(localDirPath);
-        if (!downloadDir.exists() && !downloadDir.mkdirs()) {
-            throw new IOException("Failed to create download directory: " + localDirPath);
-        }
+        if (!downloadDir.exists() && downloadDir.mkdirs() ) {
+            for (FTPFile subFile : subFiles) {
 
-        for (FTPFile subFile : subFiles) {
+                String fileName = subFile.getName();
+                if (!(".".equals(fileName) || "..".equals(fileName))) {
+                    String remoteFilePath = remoteDirPath + "/" + fileName;
+                    String localFilePath = localDirPath + File.separator + fileName;
 
-            String fileName = subFile.getName();
-            if (!(".".equals(fileName) || "..".equals(fileName))) {
-                String remoteFilePath = remoteDirPath + "/" + fileName;
-                String localFilePath = localDirPath + File.separator + fileName;
+                    if (subFile.isFile()) {
+                        if (downloadFile(connectionFtpClient, remoteFilePath, localFilePath)) { // Télécharge les fichiers
+                            downloadedFiles++;
+                        }
+                    } else if (subFile.isDirectory()) {
 
-                if (subFile.isFile()) {
-                    if (downloadFile(connectionFtpClient, remoteFilePath, localFilePath)) { // Télécharge les fichiers
-                        downloadedFiles++;
+                        if (downloadDirectory(connectionFtpClient, remoteFilePath, localFilePath, progressBar)) { // Télécharge récursivement les sous-répertoires
+                            downloadedFiles++;
+                        }
+
                     }
-                } else if (subFile.isDirectory()) {
 
-                    if (downloadDirectory(connectionFtpClient, remoteFilePath, localFilePath, progressBar)) { // Télécharge récursivement les sous-répertoires
-                        downloadedFiles++;
-                    }
+
+                    double progress = (double) downloadedFiles / totalFiles;
+                    Platform.runLater(() -> progressBar.setProgress(progress));
 
                 }
-
-
-                double progress = (double) downloadedFiles / totalFiles;
-                Platform.runLater(() -> progressBar.setProgress(progress));
-
             }
         }
 
@@ -211,7 +199,6 @@ public class FtpDownloader {
             inputStream.close();
             outputStream.close();
 
-            // Assurez-vous de mettre à jour la ProgressBar à 100 % lorsque le téléchargement est terminé
             Platform.runLater(() -> progressBar.setProgress(1.0));
 
 
@@ -221,22 +208,28 @@ public class FtpDownloader {
 
 
     //Surcharge de methode downloadFile() pour ne pas prendre en compte la progress Bar dans la recursive de downloadDirectory()
-    private boolean downloadFile(ConnectionFtpClient connectionFtpClient, String remoteFilePath, String localFilePath) {
+    /**
+     * Télécharge un fichier depuis un serveur FTP distant vers un emplacement local.
+     *
+     * @param connectionFtpClient L'objet ConnectionFtpClient contenant les informations de connexion.
+     * @param remoteFilePath      Le chemin du fichier distant sur le serveur FTP.
+     * @param localFilePath       Le chemin de destination local pour enregistrer le fichier téléchargé.
+     * @return true si le téléchargement réussit, false sinon.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'opération de téléchargement.
+     */
+    private boolean downloadFile(ConnectionFtpClient connectionFtpClient, String remoteFilePath, String localFilePath) throws IOException {
+        connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);
+
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(localFilePath))) {
             if (connectionFtpClient.getFtpClient().retrieveFile(remoteFilePath, outputStream)) {
-
                 return true;
             } else {
+
                 return false;
             }
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
-
         }
-
-
     }
 
     //--------------------------------------------------------BYPASS----------------------------------------------------------------------------------------//
@@ -254,9 +247,9 @@ public class FtpDownloader {
         executorService.execute(() -> {
             try {
                 //ByPass//
-                if (downloadFile(getLoginController().loginToServer(), remoteFilePath, localFilePath, progressBar)) {
+                if (downloadFile(getLoginController.loginToServer(), remoteFilePath, localFilePath, progressBar)) {
                     toastNotification(container).play();
-                    getLoginController().loginToServer().getFtpClient().disconnect();
+                    getLoginController.loginToServer().getFtpClient().disconnect();
 
                 }
 
@@ -284,9 +277,9 @@ public class FtpDownloader {
         executorService.execute(() -> {
             try {
 
-                if (downloadDirectory(getLoginController().loginToServer(), remoteDirPath, localDirPath, progressBar)) {
+                if (downloadDirectory(getLoginController.loginToServer(), remoteDirPath, localDirPath, progressBar)) {
                     toastNotification(container).play();
-                    getLoginController().loginToServer().getFtpClient().disconnect();
+                    getLoginController.loginToServer().getFtpClient().disconnect();
 
                 }
 

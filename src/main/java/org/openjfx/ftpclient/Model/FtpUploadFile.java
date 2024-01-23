@@ -1,26 +1,21 @@
 package org.openjfx.ftpclient.Model;
 
-import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ProgressBar;
-import javafx.util.Duration;
 import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPFile;
-import org.openjfx.ftpclient.Controller.FileTransferController;
 import org.openjfx.ftpclient.Controller.LoginController;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
+import static org.openjfx.ftpclient.Controller.LoginController.getLoginController;
 import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 /**
@@ -51,12 +46,7 @@ public class FtpUploadFile {
      * @return Le contrôleur de connexion FTP initialisé correctement
      * @throws IOException En cas d'erreur lors de l'initialisation
      */
-    private LoginController getLoginController() throws IOException {// Initialisez cette instance correctement
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));
-        Parent root = loader.load();
 
-        return loader.getController();
-    }
 
 
     /**
@@ -77,7 +67,8 @@ public class FtpUploadFile {
 
             try {
 
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 if (uploadFile(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
 
@@ -116,7 +107,7 @@ public class FtpUploadFile {
         executorService.execute(() -> {
 
             try {
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 if (uploadDirectory(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
@@ -287,14 +278,14 @@ public class FtpUploadFile {
             try {
 
                 //ByPass//
-                if (uploadFile(getLoginController().loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
+                if (uploadFile(getLoginController.loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
 
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
 
-                    getLoginController().loginToServer().getFtpClient().disconnect();
+                    getLoginController.loginToServer().getFtpClient().disconnect();
 
                 }
 
@@ -325,12 +316,12 @@ public class FtpUploadFile {
             try {
                 //ByPass//
 
-                if (uploadDirectory(getLoginController().loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
+                if (uploadDirectory(getLoginController.loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
-                    getLoginController().loginToServer().getFtpClient().disconnect();
+                    getLoginController.loginToServer().getFtpClient().disconnect();
 
                 }
 

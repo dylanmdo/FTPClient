@@ -1,18 +1,17 @@
 package org.openjfx.ftpclient.Model;
 
 import javafx.animation.Timeline;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.ProgressBar;
 import org.apache.commons.net.ftp.FTPFile;
-import org.openjfx.ftpclient.Controller.LoginController;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.openjfx.ftpclient.Controller.FileTransferController.getTimeline;
+import static org.openjfx.ftpclient.Controller.LoginController.getLoginController;
 import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
 /**
@@ -32,17 +31,7 @@ public class FtpDeleteFile {
         this.executorService = Executors.newFixedThreadPool(1);
     }
 
-    /**
-     * Récupère le contrôleur de connexion FTP.
-     *
-     * @return Le contrôleur de connexion FTP initialisé correctement
-     * @throws IOException En cas d'erreur lors de l'initialisation
-     */
-    private LoginController getLoginController() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));
-        Parent root = loader.load();
-        return loader.getController();
-    }
+
 
     /**
      * Supprime de manière asynchrone un fichier sur le serveur FTP.
@@ -57,7 +46,7 @@ public class FtpDeleteFile {
         executorService.execute(() -> {
             try {
 
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 if (deleteFile(connectionFtpClient, fileToDelete)) {
                     if (uploadCallback != null) {
@@ -86,7 +75,7 @@ public class FtpDeleteFile {
         this.uploadCallback = callback;
         executorService.execute(() -> {
             try {
-                ConnectionFtpClient connectionFtpClient = getLoginController().loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
+                ConnectionFtpClient connectionFtpClient = getLoginController.loginToServer(dataLogins[0], Integer.parseInt(dataLogins[1]), dataLogins[2], dataLogins[3]);
                 allConnectionFtp.add(connectionFtpClient);
                 if (deleteDirectory(connectionFtpClient, directoryToDelete)) {
                     if (uploadCallback != null) {
@@ -130,21 +119,36 @@ public class FtpDeleteFile {
      * @return True si la suppression réussit, sinon False
      * @throws IOException En cas d'erreur lors de la suppression du répertoire
      */
+
+    int dossier = 0;
+    int fichier = 0;
     public boolean deleteDirectory(ConnectionFtpClient connectionFtpClient, String directoryToDelete) throws IOException {
         FTPFile[] subFiles = connectionFtpClient.getFtpClient().listFiles(directoryToDelete);
 
         if (subFiles != null) {
             for (FTPFile subFile : subFiles) {
+
+
+
                 String fileName = subFile.getName();
                 if (!(".".equals(fileName) || "..".equals(fileName))) {
                     String filePath = directoryToDelete + File.separator + fileName;
                     if (subFile.isDirectory()) {
+                        dossier++;
                         deleteDirectory(connectionFtpClient, filePath); // Supprime récursivement les sous-répertoires
+
                     } else {
+                        fichier ++;
                         connectionFtpClient.getFtpClient().deleteFile(filePath); // Supprime les fichiers
+
                     }
+
+
+
                 }
+                System.out.println(fichier +" FICHIER(S) traité(s)" + "/" + (dossier) + "DOSSIER(S)" );
             }
+
         }
 
         connectionFtpClient.getFtpClient().removeDirectory(directoryToDelete); // Supprime le répertoire principal
@@ -165,13 +169,13 @@ public class FtpDeleteFile {
         executorService.execute(() -> {
             try {
                 //BYPASS//
-                ConnectionFtpClient connectionFtpClient =  getLoginController().loginToServer();
+                ConnectionFtpClient connectionFtpClient =  getLoginController.loginToServer();
                 if (deleteFile(connectionFtpClient, fileToDelete)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
                     }
                     toastNotification(container).play();
-                    getLoginController().loginToServer().getFtpClient().disconnect();
+                    getLoginController.loginToServer().getFtpClient().disconnect();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -193,7 +197,7 @@ public class FtpDeleteFile {
         executorService.execute(() -> {
             try {
                 //BYPASS//
-                ConnectionFtpClient connectionFtpClient =  getLoginController().loginToServer();
+                ConnectionFtpClient connectionFtpClient =  getLoginController.loginToServer();
                 if (deleteDirectory(connectionFtpClient, directoryToDelete)) {
                     if (uploadCallback != null) {
                         uploadCallback.onUploadComplete();
