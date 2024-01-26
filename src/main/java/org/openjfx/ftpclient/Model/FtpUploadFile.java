@@ -37,7 +37,7 @@ public class FtpUploadFile {
     }
 
     public interface UploadCallback {
-        void onUploadComplete();
+        void onActionComplete();
     }
 
     /**
@@ -46,7 +46,6 @@ public class FtpUploadFile {
      * @return Le contrôleur de connexion FTP initialisé correctement
      * @throws IOException En cas d'erreur lors de l'initialisation
      */
-
 
 
     /**
@@ -73,7 +72,7 @@ public class FtpUploadFile {
                 if (uploadFile(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
 
                     if (uploadCallback != null) {
-                        uploadCallback.onUploadComplete();
+                        uploadCallback.onActionComplete();
                     }
                     toastNotification(container).play();
 
@@ -91,15 +90,16 @@ public class FtpUploadFile {
 
 
     }
+
     /**
      * Télécharge de manière asynchrone un répertoire vers un serveur FTP.
      *
-     * @param filesDragDrop       La liste des fichiers du répertoire à télécharger via DragAndDrop.
+     * @param filesDragDrop         La liste des fichiers du répertoire à télécharger via DragAndDrop.
      * @param currentRemoteFilePath Le chemin distant où les fichiers seront téléversés.
-     * @param progressBar         La barre de progression pour afficher l'avancement.
-     * @param container            Le conteneur parent pour afficher les notifications.
-     * @param callback             Le rappel appelé lorsque le téléchargement est terminé.
-     * @param dataLogins           Les informations de connexion au serveur FTP.
+     * @param progressBar           La barre de progression pour afficher l'avancement.
+     * @param container             Le conteneur parent pour afficher les notifications.
+     * @param callback              Le rappel appelé lorsque le téléchargement est terminé.
+     * @param dataLogins            Les informations de connexion au serveur FTP.
      */
     public void uploadDirectoryAsync(List<File> filesDragDrop, String currentRemoteFilePath, ProgressBar progressBar, Parent container, UploadCallback callback, String[] dataLogins) {
         this.uploadCallback = callback;
@@ -111,7 +111,7 @@ public class FtpUploadFile {
                 allConnectionFtp.add(connectionFtpClient);
                 if (uploadDirectory(connectionFtpClient, filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
-                        uploadCallback.onUploadComplete();
+                        uploadCallback.onActionComplete();
                     }
                     toastNotification(container).play();
                     allConnectionFtp.remove(connectionFtpClient);
@@ -142,10 +142,10 @@ public class FtpUploadFile {
     /**
      * Télécharge un fichier vers un serveur FTP.
      *
-     * @param connectionFtpClient Le client FTP connecté.
-     * @param filesDragDrop       La liste des fichiers à télécharger via DragAndDrop.
+     * @param connectionFtpClient   Le client FTP connecté.
+     * @param filesDragDrop         La liste des fichiers à télécharger via DragAndDrop.
      * @param currentRemoteFilePath Le chemin distant où les fichiers seront téléchargés.
-     * @param progressBar         La barre de progression pour afficher l'avancement.
+     * @param progressBar           La barre de progression pour afficher l'avancement.
      * @return Vrai si le téléchargement réussit, faux sinon.
      * @throws IOException En cas d'erreur d'entrée/sortie pendant le téléchargement.
      */
@@ -184,15 +184,15 @@ public class FtpUploadFile {
     /**
      * Télécharge un répertoire vers un serveur FTP.
      *
-     * @param connectionFtpClient Le client FTP connecté.
-     * @param filesDragDrop       La liste des fichiers du répertoire à télécharger.
+     * @param connectionFtpClient   Le client FTP connecté.
+     * @param filesDragDrop         La liste des fichiers du répertoire à télécharger.
      * @param currentRemoteFilePath Le chemin distant où les fichiers seront téléchargés.
-     * @param progressBar         La barre de progression pour afficher l'avancement.
+     * @param progressBar           La barre de progression pour afficher l'avancement.
      * @return Vrai si le téléchargement réussit, faux sinon.
      * @throws IOException En cas d'erreur d'entrée/sortie pendant le téléchargement.
      */
     public boolean uploadDirectory(ConnectionFtpClient connectionFtpClient, List<File> filesDragDrop, String currentRemoteFilePath, ProgressBar progressBar) throws IOException {
-        uploadCallback.onUploadComplete();
+        uploadCallback.onActionComplete();
         int totalFiles = 0;
         int downloadedFiles = 0;
         for (File file : filesDragDrop) {
@@ -263,11 +263,11 @@ public class FtpUploadFile {
     /**
      * Télécharge de manière asynchrone une liste de fichiers vers un chemin distant sur un serveur FTP en contournant la connexion actuelle.
      *
-     * @param filesDragDrop       La liste des fichiers à télécharger.
+     * @param filesDragDrop         La liste des fichiers à télécharger.
      * @param currentRemoteFilePath Le chemin distant où les fichiers seront téléchargés.
-     * @param progressBar         La barre de progression pour afficher l'avancement du téléchargement.
-     * @param container            Le conteneur parent pour afficher les notifications.
-     * @param callback             Le rappel appelé lorsque le téléchargement est terminé.
+     * @param progressBar           La barre de progression pour afficher l'avancement du téléchargement.
+     * @param container             Le conteneur parent pour afficher les notifications.
+     * @param callback              Le rappel appelé lorsque le téléchargement est terminé.
      */
     public void uploadFileAsync(List<File> filesDragDrop, String currentRemoteFilePath, ProgressBar progressBar, Parent container, UploadCallback callback) {
 
@@ -281,7 +281,7 @@ public class FtpUploadFile {
                 if (uploadFile(getLoginController.loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
 
                     if (uploadCallback != null) {
-                        uploadCallback.onUploadComplete();
+                        uploadCallback.onActionComplete();
                     }
                     toastNotification(container).play();
 
@@ -302,11 +302,11 @@ public class FtpUploadFile {
     /**
      * Télécharge de manière asynchrone un répertoire vers un chemin distant sur un serveur FTP en contournant la connexion actuelle.
      *
-     * @param filesDragDrop       La liste des fichiers du répertoire à télécharger.
+     * @param filesDragDrop         La liste des fichiers du répertoire à télécharger.
      * @param currentRemoteFilePath Le chemin distant où les fichiers seront téléchargés.
-     * @param progressBar         La barre de progression pour afficher l'avancement du téléchargement.
-     * @param container            Le conteneur parent pour afficher les notifications.
-     * @param callback             Le rappel appelé lorsque le téléchargement est terminé.
+     * @param progressBar           La barre de progression pour afficher l'avancement du téléchargement.
+     * @param container             Le conteneur parent pour afficher les notifications.
+     * @param callback              Le rappel appelé lorsque le téléchargement est terminé.
      */
     public void uploadDirectoryAsync(List<File> filesDragDrop, String currentRemoteFilePath, ProgressBar progressBar, Parent container, UploadCallback callback) {
         this.uploadCallback = callback;
@@ -318,7 +318,7 @@ public class FtpUploadFile {
 
                 if (uploadDirectory(getLoginController.loginToServer(), filesDragDrop, currentRemoteFilePath, progressBar)) {
                     if (uploadCallback != null) {
-                        uploadCallback.onUploadComplete();
+                        uploadCallback.onActionComplete();
                     }
                     toastNotification(container).play();
                     getLoginController.loginToServer().getFtpClient().disconnect();
@@ -331,8 +331,6 @@ public class FtpUploadFile {
             }
 
         });
-
-
 
 
     }

@@ -10,14 +10,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.*;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.*;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import org.apache.commons.net.ProtocolCommandEvent;
-import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPFile;
 import org.openjfx.ftpclient.Main;
@@ -28,12 +32,14 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 import static org.openjfx.ftpclient.Model.ConnectionFtpClient.allConnectionFtp;
 
-public class FileTransferController implements FtpUploadFile.UploadCallback {
+public class FileTransferController implements FtpUploadFile.UploadCallback, FtpDeleteFile.DeleteCallback {
 
 
     @FXML
@@ -48,6 +54,16 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
     @FXML
     private MenuItem userId;
+
+    @FXML
+    private Pane popupDirDelete;
+
+    @FXML
+    private Label numDirDelete;
+
+    @FXML
+    private Label numFileDelete;
+
 
     public ConnectionFtpClient connectionFtpClient;
 
@@ -324,15 +340,26 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
     private Pane popupDelete;
 
 
+    MenuItem menuItemDelete;
+    MenuItem menuItemDownload;
+    MenuItem menuItemRename;
+
+
     private void contextMenu(HBox hBox, FTPFile[] files, int iterator) {
 
         ContextMenu contextMenu = new ContextMenu();
 
 
-        MenuItem menuItemDelete = new MenuItem("Supprimer");
-        MenuItem menuItemRename = new MenuItem("Renommer");
-        MenuItem menuItemDownload = new MenuItem("Télécharger");
+        menuItemDelete = new MenuItem("Supprimer");
+        menuItemDownload = new MenuItem("Télécharger");
+        menuItemRename = new MenuItem("Renommer");
+
         contextMenu.getItems().addAll(menuItemRename, menuItemDelete, menuItemDownload);
+
+        menuItemDelete.setDisable(handleAction);
+        menuItemDownload.setDisable(handleAction);
+        menuItemRename.setDisable(handleAction);
+
 
         menuItemDelete.setOnAction(event -> handleDeleteAction(files, iterator));
         menuItemRename.setOnAction(event -> handleRenameAction(hBox, files, iterator));
@@ -421,7 +448,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
 
                     if (!downloadDirPath.equals(fileName)) {
-
+                        handleAction = true;
                         progressBarFtp.setProgress(0.0);
 
                         ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload, dataLogins);
@@ -438,7 +465,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
                 }
             }
-
+            handleAction = false;
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -500,6 +527,8 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         });
     }
 
+    private boolean handleAction = false;
+
     private void handleDeleteAction(FTPFile[] files, int iterator) {
         MessageBoxController messageBoxController;
         String fileToDelete = currentWorkingDirectory + "/" + files[iterator].getName();
@@ -511,18 +540,11 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
         }
 
         if (messageBoxController.isConfirmClicked()) {
-
             if (files[iterator].isFile()) {
                 ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete, this, dataLogins);
-
-                //----BYPASS-------//
-                //ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete,this);
-
-
             } else if (files[iterator].isDirectory() || files[iterator].isSymbolicLink()) {
+                handleAction = true; // Mettre à jour l'état de la suppression du répertoire
                 ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete, this, dataLogins);
-                //----BYPASS-------//
-                //ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete,this);
 
             }
 
@@ -531,8 +553,8 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
         }
+        handleAction = false;
     }
 
 
@@ -747,8 +769,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
 
 
     @Override
-    public void onUploadComplete() {
-        // Mettez ici le code que vous voulez exécuter après la fin de l'upload
+    public void onActionComplete() {
         Platform.runLater(() -> {
             try {
                 updateFileListAndUI();
@@ -756,6 +777,30 @@ public class FileTransferController implements FtpUploadFile.UploadCallback {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        });
+    }
+
+    @Override
+    public void elementsDeleted(int fichier, int dossier) {
+
+
+        Platform.runLater(() -> {
+
+            numFileDelete.setText(String.valueOf(fichier));
+            numDirDelete.setText(String.valueOf(dossier));
+            getTimeline(popupDirDelete).play();
+
+
+        });
+    }
+
+    @Override
+    public void menuItemEnable() {
+
+        Platform.runLater(() -> {
+            menuItemDelete.setDisable(false);
+            menuItemDownload.setDisable(false);
+            menuItemRename.setDisable(false);
         });
     }
 
