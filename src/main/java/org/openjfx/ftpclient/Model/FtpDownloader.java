@@ -169,7 +169,7 @@ public class FtpDownloader {
      *
      * @param connectionFtpClient La connexion FTP
      * @param remoteFilePath      Le fichier distant à télécharger
-     * @param localFilePath       Le chemin local où le fichier sera téléchargé
+     * @param localFilePath       Le chemin local où le fichier sera téléchargé.
      * @param progressBar         La barre de progression pour afficher l'avancement du téléchargement
      * @return True si le téléchargement réussit, sinon False
      * @throws Exception En cas d'erreur lors du téléchargement

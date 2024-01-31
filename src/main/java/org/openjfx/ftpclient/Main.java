@@ -9,11 +9,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-
+/**
+ * Classe principale de l'application qui étend la classe Application de JavaFX.
+ */
 public class Main extends Application {
-
-    private Stage primaryStage;
-
 
 
     public static void main(String[] args) {
@@ -22,13 +21,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
         primaryStage.setTitle("File Transfer");
 
         // Charger le style d'interface utilisateur "Cupertino Light"
         Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
 
-        //Chargement de la page de connexion
         loginPage(primaryStage);
 
 
@@ -36,7 +33,11 @@ public class Main extends Application {
 
 
 
-
+    /**
+     * Affiche la page de connexion dans la fenêtre principale.
+     * @param primaryStage La fenêtre principale de l'application.
+     * @throws IOException Si une erreur survient lors du chargement de la page de connexion.
+     */
     public void loginPage(Stage primaryStage) throws IOException {
         // Configurer la scène avec la vue chargée et afficher la fenêtre principale
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vue/Login.fxml"));

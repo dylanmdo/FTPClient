@@ -159,11 +159,10 @@ public class FtpDeleteFile {
                     }
                 }
             }
-
+            deleteCallback.elementsDeleted(fichier, dossier);
         }
 
         connectionFtpClient.getFtpClient().removeDirectory(directoryToDelete); // Supprime le répertoire principal
-        deleteCallback.elementsDeleted(fichier, dossier);
 
         return true;
     }

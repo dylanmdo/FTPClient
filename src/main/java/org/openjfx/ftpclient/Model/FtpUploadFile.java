@@ -38,6 +38,7 @@ public class FtpUploadFile {
 
     public interface UploadCallback {
         void onActionComplete();
+
     }
 
     /**
@@ -80,6 +81,7 @@ public class FtpUploadFile {
                     connectionFtpClient.getFtpClient().disconnect();
 
                 }
+
 
             } catch (Exception e) {
                 e.printStackTrace();

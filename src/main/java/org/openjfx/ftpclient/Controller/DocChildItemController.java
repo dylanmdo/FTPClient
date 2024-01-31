@@ -26,7 +26,6 @@ public class DocChildItemController {
     private HBox containerDocChildItem;
 
 
-
     public HBox getContainerDocChildItem() {
         return containerDocChildItem;
     }

@@ -1,18 +1,13 @@
 package org.openjfx.ftpclient.Controller;
 
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
-import java.io.IOException;
-
+/**
+ * Contrôleur pour la boîte de dialogue permettant de saisir un nom de fichier.
+ * Cette classe étend la classe MessageBoxController.
+ */
 public class MkFileNameBoxController extends MessageBoxController {
 
     @FXML
@@ -21,20 +16,22 @@ public class MkFileNameBoxController extends MessageBoxController {
     @FXML
     private Button confirmButtom;
 
-
+    /**
+     * Initialise le contrôleur. Désactive le bouton de confirmation par défaut
+     * et ajoute un écouteur sur le champ de texte pour activer/désactiver le bouton en fonction du contenu.
+     */
     public void initialize() {
-        // Par défaut, le bouton "Confirmer" est désactivé
-        confirmButtom.setDisable(true);
-
-        // Ajoutez un écouteur sur le champ de texte pour activer/désactiver le bouton
+        confirmButtom.setDisable(true); // Par défaut, le bouton "Confirmer" est désactivé
         mkFileNameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             confirmButtom.setDisable(newValue.trim().isEmpty());
-        });
+        }); // Ajoute un écouteur sur le champ de texte pour activer/désactiver le bouton
     }
 
+    /**
+     * Récupère le champ de texte pour le nom de fichier.
+     * @return Le champ de texte pour le nom de fichier.
+     */
     public TextField getMkFileNameTextField() {
         return mkFileNameTextField;
     }
-
-
 }

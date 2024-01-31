@@ -64,9 +64,7 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     @FXML
     private Label numFileDelete;
 
-
     public ConnectionFtpClient connectionFtpClient;
-
 
     private String server;
     private int port;
@@ -74,9 +72,9 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     private String password;
 
 
-    private final Image imageFile = new Image(getClass().getResource("/assets/file.png").toExternalForm());
-    private final Image imageDirectory = new Image(getClass().getResource("/assets/directory.png").toExternalForm());
-    private final Image imageSymlink = new Image(getClass().getResource("/assets/symlink.png").toExternalForm());
+    private final Image imageFile = new Image(Objects.requireNonNull(getClass().getResource("/assets/file.png")).toExternalForm());
+    private final Image imageDirectory = new Image(Objects.requireNonNull(getClass().getResource("/assets/directory.png")).toExternalForm());
+    private final Image imageSymlink = new Image(Objects.requireNonNull(getClass().getResource("/assets/symlink.png")).toExternalForm());
 
     private String currentWorkingDirectory;
     private FTPFile[] files;
@@ -96,6 +94,20 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
 
     String[] dataLogins;
 
+    FtpUploadFile ftpUploadFile = new FtpUploadFile();
+
+    @FXML
+    private Pane popupDownload;
+    @FXML
+    private Pane popupUpload;
+    @FXML
+    private Pane popupDelete;
+
+
+    MenuItem menuItemDelete;
+    MenuItem menuItemDownload;
+    MenuItem menuItemRename;
+
     Main main = new Main();
 
 
@@ -103,6 +115,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     }
 
 
+    /**
+     * Initialise la fenêtre avec les données de connexion fournies.
+     *
+     * @param connectionFtpClient Objet représentant la connexion FTP.
+     * @param dataLogins          Tableau de chaînes de caractères contenant les informations de connexion [server, port, id, password].
+     * @throws Exception Si une erreur survient lors de l'initialisation.
+     */
     @FXML
     public void initialize(ConnectionFtpClient connectionFtpClient, String[] dataLogins) throws Exception {
         this.connectionFtpClient = connectionFtpClient;
@@ -120,11 +139,14 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         setFtpLink();
 
         updateUI();
-
-
     }
 
 
+    /**
+     * Met à jour le lien FTP affiché dans la barre de lien et configure les info-bulles associées.
+     *
+     * @throws IOException Si une erreur survient lors de la récupération du répertoire de travail courant du serveur FTP.
+     */
     private void setFtpLink() throws IOException {
 
         currentWorkingDirectory = connectionFtpClient.getFtpClient().printWorkingDirectory();
@@ -146,11 +168,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
                 Tooltip.install(ftpServer, tooltip);
             }
         });
-
     }
 
-
-    public void setParentDocument(FTPFile[] files) throws IOException {
+    /**
+     * Affiche la liste des répertoires dans l'interface utilisateur.
+     *
+     * @param files Un tableau de fichiers FTP à afficher dans l'interface utilisateur.
+     * @throws IOException Si une erreur survient lors du chargement de l'interface utilisateur du document.
+     */
+    public void directoryList(FTPFile[] files) throws IOException {
 
         for (int i = 0; i < files.length; i++) {
             FTPFile currentFile = files[i];
@@ -171,24 +197,37 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
                 contextMenu(hBox, files, i);
 
                 if (currentFile.isDirectory()) {
-                    addDocumentItemToUI(hBox, name, imageDirectory, documentItemController);
+                    addDirectoryItemToUI(hBox, name, imageDirectory, documentItemController);
                 }
                 if (currentFile.isSymbolicLink()) {
-                    addDocumentItemToUI(hBox, name, imageSymlink, documentItemController);
+                    addDirectoryItemToUI(hBox, name, imageSymlink, documentItemController);
                 }
             }
         }
     }
 
 
-    // Méthode pour ajouter Les dossiers Parent à l'interface utilisateur (Partie : Parent Document)
-    private void addDocumentItemToUI(HBox hBox, String name, Image image, DocumentItemController documentItemController) {
+    /**
+     * Ajoute les items répertoire à l'interface utilisateur.
+     *
+     * @param hBox                   Le conteneur HBox représentant un item répertoire.
+     * @param name                   Le nom du répertoire.
+     * @param image                  L'image représentant le répertoire.
+     * @param documentItemController Le contrôleur de l'élément de document.
+     */
+    private void addDirectoryItemToUI(HBox hBox, String name, Image image, DocumentItemController documentItemController) {
         documentItemController.setDocName(name);
         documentItemController.setDocIcon(image);
         containerDocument.getChildren().add(hBox);
     }
 
-    private void setChildDocument(FTPFile[] files) throws IOException {
+    /**
+     * Définit les sous-répertoires et Ajoute les item sous-répertoires dans l'interface utilisateur.
+     *
+     * @param files Un tableau de fichiers FTP représentant les sous-répertoires.
+     * @throws IOException Si une erreur survient lors du chargement de l'interface utilisateur du sous-répertoire.
+     */
+    private void setChildDirectory(FTPFile[] files) throws IOException {
         if (files != null && files.length > 0) {
             for (int i = 0; i < files.length; i++) {
                 FTPFile currentFile = files[i];
@@ -214,11 +253,11 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
                     contextMenu(hBox, files, i);
 
                     if (currentFile.isDirectory()) {
-                        addChildDocumentItemToUI(hBox, name, dateFormat, imageDirectory, docChildItemController, date);
+                        addChildDirectoryItemToUI(hBox, name, dateFormat, imageDirectory, docChildItemController, date);
                     } else if (currentFile.isFile()) {
-                        addChildDocumentItemToUI(hBox, name, dateFormat, imageFile, docChildItemController, date, size);
+                        addChildFileItemToUI(hBox, name, dateFormat, imageFile, docChildItemController, date, size);
                     } else if (currentFile.isSymbolicLink()) {
-                        addChildDocumentItemToUI(hBox, name, dateFormat, imageSymlink, docChildItemController, date, size);
+                        addChildFileItemToUI(hBox, name, dateFormat, imageSymlink, docChildItemController, date, size);
                     }
                 }
             }
@@ -226,16 +265,35 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     }
 
 
-    //Surcharge de la methode addChildDocumentItemToUI()
-    private void addChildDocumentItemToUI(HBox hBox, String name, DateFormat dateFormat, Image image, DocChildItemController docChildItemController, Date date) {
+    /**
+     * Ajoute un élément représentant un répertoire dans l'interface utilisateur.
+     *
+     * @param hBox                   Le conteneur HBox représentant l'élément de répertoire.
+     * @param name                   Le nom du répertoire.
+     * @param dateFormat             Le format de date à utiliser pour afficher la date de modification.
+     * @param image                  L'image représentant le répertoire.
+     * @param docChildItemController Le contrôleur de l'élément de répertoire.
+     * @param date                   La date de modification du répertoire.
+     */
+    private void addChildDirectoryItemToUI(HBox hBox, String name, DateFormat dateFormat, Image image, DocChildItemController docChildItemController, Date date) {
         docChildItemController.setDocChildItemName(name);
         docChildItemController.setDocChildItemDate(dateFormat.format(date));
         docChildItemController.setDocChildItemIcon(image);
         containerDocChild.getChildren().add(hBox);
     }
 
-    // Méthode pour ajouter des éléments des répertoires Parent à l'interface utilisateur (Partie : Child Document)
-    private void addChildDocumentItemToUI(HBox hBox, String name, DateFormat dateFormat, Image image, DocChildItemController docChildItemController, Date date, long size) {
+    /**
+     * Ajoute un élément représentant un fichier dans l'interface utilisateur.
+     *
+     * @param hBox                   Le conteneur HBox représentant l'élément de fichier.
+     * @param name                   Le nom du fichier.
+     * @param dateFormat             Le format de date à utiliser pour afficher la date de modification.
+     * @param image                  L'image représentant le fichier.
+     * @param docChildItemController Le contrôleur de l'élément de fichier.
+     * @param date                   La date de modification du fichier.
+     * @param size                   La taille du fichier.
+     */
+    private void addChildFileItemToUI(HBox hBox, String name, DateFormat dateFormat, Image image, DocChildItemController docChildItemController, Date date, long size) {
         docChildItemController.setDocChildItemName(name);
         docChildItemController.setDocChildItemDate(dateFormat.format(date));
         docChildItemController.setDocChildItemIcon(image);
@@ -244,6 +302,12 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     }
 
 
+    /**
+     * Change le répertoire de travail et actualise la vue.
+     *
+     * @param name Le nom du répertoire à changer.
+     * @throws IOException Si une erreur survient lors du changement de répertoire ou de l'actualisation de la vue.
+     */
     public void changeAndRefreshDirectory(String name) throws IOException {
         // Changer le répertoire de travail
         String originalDirectoryPath = "/";
@@ -254,27 +318,32 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
                 connectionFtpClient.getFtpClient().changeWorkingDirectory(originalDirectoryPath + name);
             }
         }
-
-        // Mettre à jour le lien FTP
         setFtpLink();
-
-        // Mettre à jour la liste des fichiers
         updateFileListAndUI();
 
     }
 
+    /**
+     * Met à jour la liste des fichiers à partir du serveur FTP et actualise l'interface utilisateur.
+     *
+     * @throws IOException Si une erreur survient lors de la mise à jour de la liste des fichiers ou de l'actualisation de l'interface utilisateur.
+     */
     public void updateFileListAndUI() throws IOException {
         // Mettre à jour la liste des fichiers
         files = connectionFtpClient.getFtpClient().listFiles();
         updateUI();
     }
 
-
+    /**
+     * Actualise l'interface utilisateur en supprimant les éléments existants et en mettant à jour la liste des répertoires.
+     *
+     * @throws IOException Si une erreur survient lors de l'actualisation de l'interface utilisateur.
+     */
     private void updateUI() throws IOException {
         containerDocChild.getChildren().clear();
         containerDocument.getChildren().clear();
 
-        setChildDocument(files);
+        setChildDirectory(files);
 
         List<FTPFile> arrayDirectory = new ArrayList<>();
 
@@ -285,12 +354,17 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         }
         FTPFile[] ftpDirectory = arrayDirectory.toArray(new FTPFile[0]);
 
-        setParentDocument(ftpDirectory);
+        directoryList(ftpDirectory);
 
 
     }
 
 
+    /**
+     * Actualise la connexion FTP et rafraîchit l'interface utilisateur.
+     *
+     * @throws Exception Si une erreur survient lors de la déconnexion, de la reconnexion ou de l'actualisation de la liste des fichiers et de l'interface utilisateur.
+     */
     @FXML
     private void ftpRefresh() throws Exception {
 
@@ -301,9 +375,18 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         connectionFtpClient.getFtpClient().enterLocalPassiveMode();
         connectionFtpClient.getFtpClient().setFileType(FTP.BINARY_FILE_TYPE);
         updateFileListAndUI();
+        setFtpLink();
+
 
     }
 
+
+    /**
+     * Formatte la taille en octets en une représentation lisible.
+     *
+     * @param bytes La taille en octets.
+     * @return Une chaîne représentant la taille formatée.
+     */
     public String formatBytes(long bytes) {
         if (bytes < 1024) {
             return bytes + " octets";
@@ -319,6 +402,13 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         }
     }
 
+
+    /**
+     * Gère le retour en arrière dans la hiérarchie des répertoires FTP lors d'un clic de souris.
+     *
+     * @param event L'événement de souris associé au clic.
+     * @throws IOException Si une erreur survient lors du changement de répertoire ou de l'actualisation de l'interface utilisateur.
+     */
     @FXML
     private void ftpReturn(MouseEvent event) throws IOException {
         MouseButton button = event.getButton();
@@ -330,21 +420,14 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
 
     }
 
-    boolean isEnter = false;
 
-    @FXML
-    private Pane popupDownload;
-    @FXML
-    private Pane popupUpload;
-    @FXML
-    private Pane popupDelete;
-
-
-    MenuItem menuItemDelete;
-    MenuItem menuItemDownload;
-    MenuItem menuItemRename;
-
-
+    /**
+     * Gère le menu contextuel lors du clic droit sur un élément de l'interface utilisateur.
+     *
+     * @param hBox     Le conteneur HBox associé à l'élément.
+     * @param files    Un tableau de fichiers FTP.
+     * @param iterator L'indice de l'élément dans le tableau.
+     */
     private void contextMenu(HBox hBox, FTPFile[] files, int iterator) {
 
         ContextMenu contextMenu = new ContextMenu();
@@ -357,9 +440,6 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         contextMenu.getItems().addAll(menuItemRename, menuItemDelete, menuItemDownload);
 
         menuItemDelete.setDisable(handleAction);
-        menuItemDownload.setDisable(handleAction);
-        menuItemRename.setDisable(handleAction);
-
 
         menuItemDelete.setOnAction(event -> handleDeleteAction(files, iterator));
         menuItemRename.setOnAction(event -> handleRenameAction(hBox, files, iterator));
@@ -374,106 +454,51 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
 
     }
 
-
+    /**
+     * Gère l'action de téléchargement d'un fichier ou d'un répertoire depuis le serveur FTP.
+     *
+     * @param files    Un tableau de fichiers FTP.
+     * @param iterator L'indice de l'élément dans le tableau.
+     */
     private void handleDownloadAction(FTPFile[] files, int iterator) {
-
-
         try {
-
             DirectoryChooser directoryChooser = new DirectoryChooser();
-
             File selectedDirectory = directoryChooser.showDialog(containerDocument.getScene().getWindow());
 
-            if (files[iterator].isFile()) {
-                if (selectedDirectory != null) {
-
-                    String remoteFile;
-                    if (currentWorkingDirectory.equals("/")) {
-                        remoteFile = currentWorkingDirectory + files[iterator].getName();
-                    } else {
-                        remoteFile = currentWorkingDirectory + "/" + files[iterator].getName();
-                    }
-                    //Emplacement ou le fichier va etre téléchargé
-                    String downloadFile = selectedDirectory.getAbsolutePath() + "/" + files[iterator].getName();
-
-                    String fileName = null;
+            if (selectedDirectory == null) {
+                return;
+            }
 
 
-                    for (File file : Objects.requireNonNull(selectedDirectory.listFiles())) {
-                        if (file.getAbsolutePath().equals(downloadFile)) {
-                            fileName = file.getAbsolutePath();
-                            System.out.println(fileName);
-                            break;
-                        }
+            String fileName = files[iterator].getName();
+            String remotePath = currentWorkingDirectory.equals("/") ? currentWorkingDirectory + fileName : currentWorkingDirectory + "/" + fileName;
+            String localPath = selectedDirectory.getAbsolutePath() + "/" + fileName;
 
-                    }
-
-                    if (!downloadFile.equals(fileName)) {
-
-                        progressBarFtp.setProgress(0.0);
-                        ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload, dataLogins);
-
-                        //-----BYPASS---//
-                        //ftpDownloader.downloadFileAsync(remoteFile, downloadFile, progressBarFtp, popupDownload);
-
-
-                    } else {
-                        showDialogueBox("/Vue/MessageBoxFileExist.fxml");
-                        //ftpDownloader.deleteCloseConnection(dataLogins);
-                    }
-
-
-                }
-            } else if (files[iterator].isDirectory()) {
-                String fileName = null;
-
-                if (selectedDirectory != null) {
-                    String remoteDir;
-                    if (currentWorkingDirectory.equals("/")) {
-                        remoteDir = currentWorkingDirectory + files[iterator].getName();
-                    } else {
-                        remoteDir = currentWorkingDirectory + "/" + files[iterator].getName();
-                    }
-
-                    String downloadDirPath = selectedDirectory.getAbsolutePath() + "/" + files[iterator].getName();
-
-                    for (File file : Objects.requireNonNull(selectedDirectory.listFiles())) {
-                        if (file.getAbsolutePath().equals(downloadDirPath)) {
-                            fileName = file.getAbsolutePath();
-                            System.out.println(fileName);
-                            break;
-                        }
-
-                    }
-
-
-                    if (!downloadDirPath.equals(fileName)) {
-                        handleAction = true;
-                        progressBarFtp.setProgress(0.0);
-
-                        ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload, dataLogins);
-
-                        //BYPASS//
-                        //ftpDownloader.downloadDirectoryAsync(remoteDir, downloadDirPath, progressBarFtp, popupDownload).shutdown();
-
-
-                    } else {
-                        showDialogueBox("/Vue/MessageBoxFileExist.fxml");
-
-                    }
-
-
+            for (File file : Objects.requireNonNull(selectedDirectory.listFiles())) {
+                if (file.getAbsolutePath().equals(localPath)) {
+                    showDialogueBox("/Vue/MessageBoxFileExist.fxml");
+                    return;
                 }
             }
-            handleAction = false;
+
+            progressBarFtp.setProgress(0.0);
+
+            if (files[iterator].isFile()) {
+                ftpDownloader.downloadFileAsync(remotePath, localPath, progressBarFtp, popupDownload, dataLogins);
+            } else if (files[iterator].isDirectory()) {
+
+                ftpDownloader.downloadDirectoryAsync(remotePath, localPath, progressBarFtp, popupDownload, dataLogins);
+            }
+
+
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-
     }
 
+    boolean isEnter = false;
 
     private void handleRenameAction(HBox hBox, FTPFile[] files, int iterator) {
         Label label = (Label) hBox.getChildren().get(1);
@@ -529,10 +554,16 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
 
     private boolean handleAction = false;
 
+    /**
+     * Gère l'action de suppression d'un fichier ou d'un répertoire depuis le serveur FTP.
+     *
+     * @param files    Un tableau de fichiers FTP.
+     * @param iterator L'indice de l'élément dans le tableau.
+     */
     private void handleDeleteAction(FTPFile[] files, int iterator) {
-        MessageBoxController messageBoxController;
         String fileToDelete = currentWorkingDirectory + "/" + files[iterator].getName();
-        String directoryToDelete = currentWorkingDirectory + "/" + files[iterator].getName();
+        MessageBoxController messageBoxController;
+
         try {
             messageBoxController = showDialogueBox("/Vue/MessageBox.fxml");
         } catch (IOException e) {
@@ -543,9 +574,8 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
             if (files[iterator].isFile()) {
                 ftpDeleteFile.deleteFileAsync(fileToDelete, popupDelete, this, dataLogins);
             } else if (files[iterator].isDirectory() || files[iterator].isSymbolicLink()) {
-                handleAction = true; // Mettre à jour l'état de la suppression du répertoire
-                ftpDeleteFile.deleteDirectoryAsync(directoryToDelete, popupDelete, this, dataLogins);
-
+                handleAction = true;
+                ftpDeleteFile.deleteDirectoryAsync(fileToDelete, popupDelete, this, dataLogins);
             }
 
             try {
@@ -558,129 +588,145 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     }
 
 
+    /**
+     * Renomme l'élément sélectionné, vérifie s'il existe déjà un élément avec le même nom,
+     * et met à jour l'interface utilisateur en conséquence.
+     *
+     * @param hBox            Le conteneur HBox associé à l'élément.
+     * @param files           Un tableau de fichiers FTP.
+     * @param iterator        L'indice de l'élément dans le tableau.
+     * @param label           Le label de l'élément.
+     * @param renameTextField Le champ de texte contenant le nouveau nom.
+     */
     private void renameAndCheckDuplicateAndUpdate(HBox hBox, FTPFile[] files, int iterator, Label label, TextField renameTextField) {
         String input = renameTextField.getText();
-        boolean inputMatchesFileName = false;
-        String fileName = null;
 
-        // Vérifier si l'input correspond au nom d'un fichier existant (et pas à l'ancien nom)
+        if (input.isBlank()) {
+            label.setText(files[iterator].getName());
+            hBox.getChildren().set(1, label);
+            return;
+        }
+
         for (FTPFile file : files) {
-            fileName = file.getName();
+            String fileName = file.getName();
             if (input.equals(fileName) && !input.equals(label.getText())) {
-                inputMatchesFileName = true;
-                break;
+                Platform.runLater(() -> {
+                    try {
+                        showDialogueBox("/Vue/MessageBoxNameExist.fxml");
+                        label.setText(files[iterator].getName());
+                        hBox.getChildren().set(1, label);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                return;
             }
         }
 
-        if (!input.equals(fileName) && !input.isBlank()) {
-            // Valider et renommer le fichier si nécessaire
-            if (validateInput(input)) {
-                String oldFile = currentWorkingDirectory + "/" + files[iterator].getName();
-                String newFile = currentWorkingDirectory + "/" + input;
-                try {
-                    connectionFtpClient.getFtpClient().rename(oldFile, newFile);
-                    updateFileListAndUI();
-                } catch (IOException e) {
-                    // Gérer l'exception d'entrée/sortie ici (par exemple, enregistrer dans un fichier de journal)
-                    e.printStackTrace();
-                }
+        if (validateInput(input)) {
+            String oldFile = currentWorkingDirectory + "/" + files[iterator].getName();
+            String newFile = currentWorkingDirectory + "/" + input;
+            try {
+                connectionFtpClient.getFtpClient().rename(oldFile, newFile);
+                updateFileListAndUI();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } else if (inputMatchesFileName) {
-            Platform.runLater(() -> {
-                try {
-                    showDialogueBox("/Vue/MessageBoxNameExist.fxml");
-                    label.setText(files[iterator].getName());
-                    hBox.getChildren().set(1, label);
-                } catch (IOException e) {
-                    // Gérer l'exception d'entrée/sortie ici (par exemple, enregistrer dans un fichier de journal)
-                    e.printStackTrace();
-                }
-            });
-        } else {
-            label.setText(files[iterator].getName());
-            hBox.getChildren().set(1, label);
         }
     }
 
 
+    /**
+     * Valide l'entrée utilisateur en vérifiant si elle n'est pas vide après suppression des espaces inutiles.
+     *
+     * @param input L'entrée utilisateur à valider.
+     * @return true si l'entrée est valide, sinon false.
+     */
     private boolean validateInput(String input) {
         return !input.trim().isEmpty();
     }
 
+    /**
+     * Gère l'action de création d'un nouveau fichier sur le serveur FTP.
+     *
+     * @param event L'événement de souris associé à l'action.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @FXML
     private void ftpMakeFile(MouseEvent event) throws IOException {
-        MouseButton button = event.getButton();
-
-        MkFileNameBoxController mkFileNameBoxController = showDialogueBox("/Vue/MkFileNameBox.fxml");
-
-        String input = mkFileNameBoxController.getMkFileNameTextField().getText();
-        String remoteFilePath = currentWorkingDirectory + "/" + input;
-        String fileName = null;
-
-        if (button == MouseButton.PRIMARY && (event.getClickCount()) == 1) {
-
-            boolean inputMatchesFileName = false; // Variable pour vérifier si l'input correspond à fileName
-
-            for (FTPFile file : files) {
-
-                fileName = file.getName();
-                if (input.equals(fileName)) {
-                    inputMatchesFileName = true;
-                    break;
-                }
-
-            }
-
-            if (!input.equals(fileName) && !input.isBlank()) {
-                if (mkFileNameBoxController.isConfirmClicked()) {
-                    connectionFtpClient.getFtpClient().storeFile(remoteFilePath, new ByteArrayInputStream(new byte[0]));
-                    updateFileListAndUI();
-                }
-            } else if (inputMatchesFileName) {
-                showDialogueBox("/Vue/MessageBoxNameExist.fxml");
-            }
-
-
-        }
-
+        handleFtpAction(event, ActionType.MAKE_FILE);
     }
 
+    /**
+     * Gère l'action de création d'un nouveau répertoire sur le serveur FTP.
+     *
+     * @param event L'événement de souris associé à l'action.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @FXML
     private void ftpMkdir(MouseEvent event) throws IOException {
-        MouseButton button = event.getButton();
-        MkFileNameBoxController mkFileNameBoxController = showDialogueBox("/Vue/MkFileNameBox.fxml");
-        String input = mkFileNameBoxController.getMkFileNameTextField().getText();
-        String directoryName = null;
-        if (button == MouseButton.PRIMARY && (event.getClickCount()) == 1) {
-
-            boolean inputMatchesFileName = false; // Variable pour vérifier si l'input correspond à fileName
-
-            for (FTPFile file : files) {
-
-                directoryName = file.getName();
-                if (input.equals(directoryName)) {
-                    inputMatchesFileName = true;
-                    break;
-                }
-            }
-
-            if (!input.equals(directoryName) && !input.isBlank()) {
-                if (mkFileNameBoxController.isConfirmClicked()) {
-                    connectionFtpClient.getFtpClient().makeDirectory(input);
-                    updateFileListAndUI();
-                }
-            } else if (inputMatchesFileName) {
-                showDialogueBox("/Vue/MessageBoxNameExist.fxml");
-            }
-
-        }
-
-
+        handleFtpAction(event, ActionType.MAKE_DIRECTORY);
     }
 
-    FtpUploadFile ftpUploadFile = new FtpUploadFile();
 
+    /**
+     * Gère l'action de création d'un nouveau fichier ou d'un répertoire sur le serveur FTP en fonction du type d'action spécifié.
+     *
+     * @param event      L'événement de souris associé à l'action.
+     * @param actionType Le type d'action à effectuer (MAKE_FILE pour créer un fichier, MAKE_DIRECTORY pour créer un répertoire).
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    @FXML
+    private void handleFtpAction(MouseEvent event, ActionType actionType) throws IOException {
+        MouseButton button = event.getButton();
 
+        if (button != MouseButton.PRIMARY || event.getClickCount() != 1) {
+            return;
+        }
+
+        MkFileNameBoxController mkFileNameBoxController = showDialogueBox("/Vue/MkFileNameBox.fxml");
+        String input = mkFileNameBoxController.getMkFileNameTextField().getText();
+
+        if (input.isBlank()) {
+            return;
+        }
+
+        String remotePath = currentWorkingDirectory + "/" + input;
+
+        for (FTPFile file : files) {
+            if (input.equals(file.getName())) {
+                showDialogueBox("/Vue/MessageBoxNameExist.fxml");
+                return;
+            }
+        }
+
+        if (mkFileNameBoxController.isConfirmClicked()) {
+            if (actionType == ActionType.MAKE_FILE) {
+                connectionFtpClient.getFtpClient().storeFile(remotePath, new ByteArrayInputStream(new byte[0]));
+            } else if (actionType == ActionType.MAKE_DIRECTORY) {
+                connectionFtpClient.getFtpClient().makeDirectory(input);
+            }
+            updateFileListAndUI();
+        }
+    }
+
+    // Enum pour représenter les actions FTP possibles
+    /**
+     * Représente les différentes actions disponibles pour les opérations FTP.
+     * MAKE_FILE : Action pour créer un nouveau fichier.
+     * MAKE_DIRECTORY : Action pour créer un nouveau répertoire.
+     */
+    private enum ActionType {
+        MAKE_FILE,
+        MAKE_DIRECTORY
+    }
+
+    /**
+     * Gère l'événement de survol lors du glisser-déposer des fichiers.
+     * Cette méthode accepte tous les modes de transfert si des fichiers sont glissés.
+     *
+     * @param event L'événement de survol associé.
+     */
     @FXML
     void handleDragOver(DragEvent event) {
         if (event.getDragboard().hasFiles()) {
@@ -688,115 +734,156 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         }
     }
 
+
+    /**
+     * Gère l'événement de glisser-déposer des fichiers pour les téléverser sur le serveur FTP.
+     * Cette méthode vérifie les fichiers à téléverser, évite les doublons et commence le téléversement.
+     *
+     * @param event L'événement de glisser-déposer associé.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @FXML
     void handleDragDrop(DragEvent event) throws IOException {
-        List<File> filesDragDrop = event.getDragboard().getFiles();
-        List<File> filesToUpload = new ArrayList<>(filesDragDrop); // Créez une copie de la liste d'origine
+        if (!event.getDragboard().hasFiles()) {
+            return;
+        }
 
+        List<File> filesToUpload = new ArrayList<>(event.getDragboard().getFiles());
         String remoteFile = currentWorkingDirectory;
         FTPFile[] existingFiles = connectionFtpClient.getFtpClient().listFiles(remoteFile);
 
-        for (File file : filesDragDrop) {
+        for (File file : new ArrayList<>(filesToUpload)) {
             for (FTPFile fileExisting : existingFiles) {
                 if (fileExisting.getName().equals(file.getName())) {
                     showDialogueBox("/Vue/MessageBoxNameExist.fxml");
-                    filesToUpload.remove(file); // Supprime l'élément en question de filesToUpload
+                    filesToUpload.remove(file);
                     break;
                 }
             }
         }
 
-        List<File> filesDagDropToUpload = new ArrayList<>();
-        List<File> DirDagDropToUpload = new ArrayList<>();
+        List<File> filesToUploadDagDrop = new ArrayList<>();
+        List<File> directoriesToUploadDagDrop = new ArrayList<>();
 
         for (File file : filesToUpload) {
             if (file.isFile()) {
-                filesDagDropToUpload.add(file);
+                filesToUploadDagDrop.add(file);
             } else if (file.isDirectory()) {
-                DirDagDropToUpload.add(file);
+                directoriesToUploadDagDrop.add(file);
             }
         }
 
+        if (!filesToUploadDagDrop.isEmpty()) {
 
-        try {
-            if (!filesDagDropToUpload.isEmpty()) {
-                //ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
-                ftpUploadFile.uploadFileAsync(filesDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
-            }
-
-            if (!DirDagDropToUpload.isEmpty()) {
-                //ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this);
-                ftpUploadFile.uploadDirectoryAsync(DirDagDropToUpload, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
-            }
-        } catch (Exception e) {
-            ////AJOUTER MESSAGE ERREUR
-            System.out.println(e.getMessage());
+            ftpUploadFile.uploadFileAsync(filesToUploadDagDrop, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
         }
 
+        if (!directoriesToUploadDagDrop.isEmpty()) {
+
+            ftpUploadFile.uploadDirectoryAsync(directoriesToUploadDagDrop, currentWorkingDirectory, progressBarFtp, popupUpload, this, dataLogins);
+        }
 
     }
 
+    /**
+     * Gère l'action de fermeture de l'application FTP.
+     *
+     * @param event L'événement associé à la fermeture de l'application.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @FXML
     void ftpClose(ActionEvent event) throws IOException {
         System.exit(0);
     }
 
 
+    /**
+     * Gère l'action de déconnexion de l'utilisateur FTP.
+     * Cette méthode ferme toutes les connexions FTP ouvertes et redirige l'utilisateur vers la page de connexion.
+     *
+     * @param event L'événement associé à la déconnexion de l'utilisateur.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la redirection vers la page de connexion.
+     */
     @FXML
     void ftpLogout(ActionEvent event) throws IOException {
-        Stage primaryStage = new Stage();
-        Stage currentStage = (Stage) containerDocument.getScene().getWindow();
-
         closeAllConnectionTtp();
-
-        currentStage.close();
-        main.loginPage(primaryStage);
+        Stage currentStage = (Stage) containerDocument.getScene().getWindow();
+        main.loginPage(currentStage);
     }
 
-    public void closeAllConnectionTtp() throws IOException {
-        //Fermeture de la connexion du thread principal
-        connectionFtpClient.getFtpClient().logout();
-        connectionFtpClient.getFtpClient().disconnect();
 
-        //Fermeture de la connexion du thread asynchrone
-        if (!allConnectionFtp.isEmpty()) {
-            for (ConnectionFtpClient ftpClient : allConnectionFtp) {
-                ftpClient.getFtpClient().logout();
-                ftpClient.getFtpClient().disconnect();
-            }
+
+
+    /**
+     * Ferme toutes les connexions FTP ouvertes.
+     * Cette méthode boucle sur toutes les connexions FTP et les ferme en utilisant la méthode {@link #closeFtpClient(ConnectionFtpClient)}.
+     *
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la déconnexion des clients FTP.
+     */
+    public void closeAllConnectionTtp() throws IOException {
+        closeFtpClient(connectionFtpClient);
+
+        for (ConnectionFtpClient ftpClient : allConnectionFtp) {
+            closeFtpClient(ftpClient);
+        }
+    }
+
+    /**
+     * Ferme le client FTP spécifié.
+     * Cette méthode déconnecte le client FTP en appelant les méthodes logout() et disconnect().
+     *
+     * @param ftpClient Le client FTP à fermer.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la déconnexion du client FTP.
+     */
+    private void closeFtpClient(ConnectionFtpClient ftpClient) throws IOException {
+        if (ftpClient != null) {
+            ftpClient.getFtpClient().logout();
+            ftpClient.getFtpClient().disconnect();
         }
     }
 
 
+    /**
+     * Appelé lorsque l'action est terminée.
+     * Cette méthode met à jour la liste des fichiers et l'interface utilisateur sur le thread de l'interface graphique.
+     */
     @Override
     public void onActionComplete() {
         Platform.runLater(() -> {
+
             try {
                 updateFileListAndUI();
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
         });
     }
 
+    /**
+     * Appelé lorsque des éléments sont supprimés.
+     * Cette méthode met à jour les compteurs de fichiers et de dossiers supprimés, puis déclenche une animation de popup sur le thread de l'interface graphique.
+     *
+     * @param fichier Le nombre de fichiers supprimés.
+     * @param dossier Le nombre de dossiers supprimés.
+     */
     @Override
     public void elementsDeleted(int fichier, int dossier) {
-
-
         Platform.runLater(() -> {
 
-            numFileDelete.setText(String.valueOf(fichier));
-            numDirDelete.setText(String.valueOf(dossier));
-            getTimeline(popupDirDelete).play();
-
+                numFileDelete.setText(String.valueOf(fichier));
+                numDirDelete.setText(String.valueOf(dossier));
+                getTimeline(popupDirDelete).play();
 
         });
     }
 
+    /**
+     * Active les éléments du menu.
+     * Cette méthode active les options de suppression, de téléchargement et de renommage dans le menu sur le thread de l'interface graphique.
+     */
     @Override
     public void menuItemEnable() {
-
         Platform.runLater(() -> {
             menuItemDelete.setDisable(false);
             menuItemDownload.setDisable(false);
@@ -805,6 +892,15 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
     }
 
 
+    /**
+     * Affiche une boîte de dialogue à partir d'un fichier FXML spécifié.
+     * Cette méthode charge le fichier FXML, configure le contrôleur, puis affiche la boîte de dialogue modale.
+     *
+     * @param fxmlFile Le chemin vers le fichier FXML de la boîte de dialogue.
+     * @param <T> Le type du contrôleur de la boîte de dialogue.
+     * @return Le contrôleur de la boîte de dialogue.
+     * @throws IOException Si une erreur d'entrée-sortie se produit lors du chargement du fichier FXML.
+     */
     private <T> T showDialogueBox(String fxmlFile) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
         Parent root = loader.load();
@@ -834,6 +930,12 @@ public class FileTransferController implements FtpUploadFile.UploadCallback, Ftp
         return controller;
     }
 
+    /**
+     * Crée et retourne une timeline qui rend visible le conteneur spécifié pendant 5 secondes, puis le rend invisible.
+     *
+     * @param container Le conteneur à rendre visible pendant un certain temps.
+     * @return Une timeline qui contrôle la visibilité du conteneur.
+     */
     public static Timeline getTimeline(Parent container) {
         container.setVisible(true);
         Duration delay = Duration.seconds(5);
