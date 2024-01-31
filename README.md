@@ -1,4 +1,5 @@
-FTP Client en Java
+FTP Client
+
 Un client FTP simple en Java permettant aux utilisateurs de se connecter à un serveur FTP, de naviguer entre les fichiers  distants, et d'effectuer des opérations de transfert de fichiers. Ce projet vise à fournir une solution conviviale pour l'accès aux serveurs FTP, avec une interface utilisateur intuitive.
 
 Fonctionnalités principales
